@@ -4,7 +4,9 @@ This is additional data files for the manuscript
 
 
 Lurong Pan1 and Stephen G Aller2*
+
 1,2Department of Pharmacology and Toxicology, Center for Structural Biology, University of Alabama at Birmingham, 1025 18th Street South, Birmingham, AL, 35205
+
 *To whom correspondence should be addressed: sgaller@uab.edu
 
 
