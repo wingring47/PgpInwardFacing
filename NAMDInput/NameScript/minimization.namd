@@ -1,0 +1,73 @@
+#############################################################
+## JOB DESCRIPTION                                         ##
+#############################################################
+
+# Minimization of PGP in lipid bilayer, TIP3P 
+
+#############################################################
+## ADJUSTABLE PARAMETERS                                   ##
+#############################################################
+
+coordinates                          input.pdb
+structure                            input.psf
+
+set outputname                       min
+set restartname                      min
+set temperature                      0
+
+firsttimestep                        0  ;# starting at 0 steps
+
+
+#############################################################
+## SIMULATION PARAMETERS                                   ##
+#############################################################
+
+# Input
+paraTypeCharmm                       on
+parameters                           par_all_prot22_lipid36.par
+temperature                          $temperature
+
+# Periodic Cell
+cellBasisVector1                     136.000   0.000   0.000
+cellBasisVector2                       0.000 134.000   0.000
+cellBasisVector3                       0.000   0.000 165.000
+cellOrigin                             0.000   0.000   0.000 
+
+# Full Electrostatics
+PME                                  on
+PMEGridSpacing                       1.0
+
+# Force-Field Parameters
+exclude                              scaled1-4
+1-4scaling                           1.0
+cutoff                               12.
+switching                            on
+switchdist                           8.   ;# use switching function at 8 angstroms
+vdwForceSwitching                    on
+pairlistdist                         14
+
+# Integrator Parameters
+timestep                             2.0  ;# 2fs/step
+rigidBonds                           all  ;# needed for 2fs steps
+nonbondedFreq                        1
+fullElectFrequency                   2
+stepspercycle                        10
+
+# Output
+outputName                           $outputname
+outputEnergies                       100
+
+# Restart
+restartname                          $restartname
+restartfreq                          5000
+restartsave                          on
+
+#############################################################
+## EXTRA PARAMETERS                                        ##
+#############################################################
+#############################################################
+## EXECUTION SCRIPT                                        ##
+#############################################################
+
+# Minimization
+minimize                             20000; # use 10000 steps of conjugate gradient minimization

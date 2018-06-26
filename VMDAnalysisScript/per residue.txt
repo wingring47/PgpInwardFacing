@@ -1,0 +1,29 @@
+proc ph {{infile} {lframe}} {
+set newfile [open $infile.txt a]
+puts $newfile "resid	H	T	C	G	I	B	E"
+set ac [atomselect top {name CA}]
+set resmax [llength [lsort -unique[$ac get resid]]]
+for {set f 0} {$f <= $lframe} {incr f}  {
+  animate goto $f 
+  display update ui
+ for {set res 0} {$res < $resmax} {incr res} {
+ set seq [$ac get structure]
+ set restrframe [lindex $seq $res]
+ lappend restr($res) $restrframe
+}
+ }
+ for {set res 0} {$res < $resmax} {incr res} {
+ set per_H [expr ([llength [lsearch -all $restr($res) H]]*100/$lframe.)]
+ set per_T [expr ([llength [lsearch -all $restr($res) T]]*100/$lframe.)]
+ set per_C [expr ([llength [lsearch -all $restr($res) C]]*100/$lframe.)]
+ set per_G [expr ([llength [lsearch -all $restr($res) G]]*100/$lframe.)]
+ set per_I [expr ([llength [lsearch -all $restr($res) I]]*100/$lframe.)]
+ set per_B [expr ([llength [lsearch -all $restr($res) B]]*100/$lframe.)]
+ set per_E [expr ([llength [lsearch -all $restr($res) E]]*100/$lframe.)]
+ set resid [expr $res+1]
+ puts $newfile "$resid	$per_H	$per_T	$per_C	$per_G	$per_I	$per_B	$per_E"
+}
+ close $newfile
+  }
+   
+	

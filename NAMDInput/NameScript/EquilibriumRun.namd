@@ -1,0 +1,103 @@
+#############################################################
+## JOB DESCRIPTION                                         ##
+#############################################################
+
+#
+#
+#
+#300ns at 310K run for input without any constraint
+#
+#
+#
+
+
+#############################################################
+## ADJUSTABLE PARAMETERS                                   ##
+#############################################################
+
+coordinates                          input.pdb
+structure                            input.psf
+bincoordinates                       input_eq4B.coor
+
+set outputname                       input_eq5B
+set restartname                      input_eq5B
+set temperature                      310
+
+firsttimestep                        0      ;# starting at 0 steps
+outputTiming                         25000  ;# Update every 50 ps
+
+#############################################################
+## SIMULATION PARAMETERS                                   ##
+#############################################################
+
+# Input
+paraTypeCharmm                       on
+parameters                           par_all_prot22_lipid36.par
+temperature                          $temperature
+
+# Periodic Cell
+extendedSystem                       input_eq4B.xsc
+wrapWater                            on
+wrapAll                              on
+
+# Full Electrostatics
+PME                                  on
+PMEGridSpacing                       1.0
+
+# Force-Field Parameters
+exclude                              scaled1-4
+1-4scaling                           1.0
+cutoff                               12.
+switching                            on
+switchdist                           8.   ;# use switching function at 8 angstroms
+pairlistdist                         14
+vdwForceSwitching                    on
+margin                               2.5
+
+# Integrator Parameters
+timestep                             2.0  ;# 2fs/step
+rigidBonds                           all  ;# needed for 2fs steps
+nonbondedFreq                        1
+fullElectFrequency                   2
+stepspercycle                        10
+
+# Output
+outputName                           $outputname
+outputEnergies                       500
+outputPressure                       500
+
+# Restart
+restartsave                          on
+restartname                          $restartname
+restartfreq                          50000 ;# create restart every 100 ps
+dcdfreq                              5000  ;# add to dcd every 10 ps
+veldcdfreq                           5000  ;# add to veldcd every 10 ps
+
+# Temperature Control
+langevin                             on
+langevinTemp                         $temperature
+langevinDamping                      1
+
+# Pressure Control
+useGroupPressure                     yes
+useFlexibleCell                      yes
+LangevinPiston                       on
+LangevinPistonTarget                 1.01325
+LangevinPistonPeriod                 200
+LangevinPistonDecay                  100
+LangevinPistonTemp                   310  
+
+#############################################################
+## EXTRA PARAMETERS                                        ##
+#############################################################
+#############################################################
+## EXECUTION SCRIPT                                        ##
+#############################################################
+
+# Equilibration
+reinitvels          $temperature;
+run                 500000; # Equilibrate for 1000ps (total 1000ps)
+for {set i 2} {$i <= 300} {incr i} {
+  reinitvels          $temperature;
+  run                 500000 ;# equilibrate for 1000ps (total $i000ps)
+}

@@ -1,0 +1,14 @@
+ # Prints the SASA of the protein over timestep
+                proc sasa_time  {molid selection lframe output} {
+                     set newfile [open $output.txt w+]
+                     puts $newfile "sasa"
+                     set cluster [atomselect $molid $selection]
+                     for {set x 0} {$x <= $lframe} {incr x} {
+                       animate goto $x
+                       set s [measure sasa 1.4 $cluster]
+                       puts $newfile "$s"
+                     }
+                     close $newfile
+                  }
+              
+  

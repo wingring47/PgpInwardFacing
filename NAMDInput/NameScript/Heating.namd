@@ -1,0 +1,100 @@
+#############################################################
+## JOB DESCRIPTION                                         ##
+#############################################################
+
+# Heating of to 310K 
+#
+
+
+#############################################################
+## ADJUSTABLE PARAMETERS                                   ##
+#############################################################
+
+coordinates                          input.pdb
+structure                            input.psf
+bincoordinates                       input_min.coor
+
+set outputname                       input_eq1B
+set restartname                      input_eq1B
+set temperature                      310
+
+firsttimestep                        0      ;# starting at 0 steps
+outputTiming                         25000  ;# Update every 50 ps
+
+#############################################################
+## SIMULATION PARAMETERS                                   ##
+#############################################################
+
+# Input
+paraTypeCharmm                       on
+parameters                           par_all_prot22_lipid36.par
+temperature                          0
+
+# Periodic Cell
+extendedSystem                       input_min.xsc
+wrapWater                            on
+wrapAll                              on
+
+# Full Electrostatics
+PME                                  on
+PMEGridSpacing                       1.0
+
+# Force-Field Parameters
+exclude                              scaled1-4
+1-4scaling                           1.0
+cutoff                               12.
+switching                            on
+switchdist                           8.   ;# use switching function at 8 angstroms
+vdwForceSwitching                    on
+pairlistdist                         14
+
+# Integrator Parameters
+timestep                             2.0  ;# 2fs/step
+rigidBonds                           all  ;# needed for 2fs steps
+nonbondedFreq                        1
+fullElectFrequency                   2
+stepspercycle                        10
+
+# Output
+outputName                           $outputname
+outputEnergies                       500
+outputPressure                       500
+
+# Restart
+restartname                          $restartname
+restartfreq                          25000 ;# create restart every 50 ps
+restartsave                          on
+dcdfreq                              5000  ;# add to dcd every 10 ps
+veldcdfreq                           5000  ;# add to veldcd every 10 ps
+
+# Temperature Control
+reassignTemp                         0     ;# begin at 0 K
+reassignFreq                         5000  ;# increase temperature every 10 ps
+reassignIncr                         10     ;# increase temperature by 10 K
+reassignHold                         $temperature
+
+# Pressure Control
+useGroupPressure                     yes
+useFlexibleCell                      yes
+BerendsenPressure                    on
+BerendsenPressureTarget              1.01325
+BerendsenPressureCompressibility     4.57E-5
+BerendsenPressureRelaxationTime      100
+BerendsenPressureFreq                2
+
+#############################################################
+## EXTRA PARAMETERS                                        ##
+#############################################################
+constraints                          on 
+consref                              constrain.pdb 
+conskfile                            constrain.pdb
+conskcol                             B 
+
+#############################################################
+## EXECUTION SCRIPT                                        ##
+#############################################################
+
+# Equilibration
+reinitvels          0     ; # Reset velocities to give temp of 0 K
+run                 155000; # Equilibrate for 1000ps (total 1000ps)
+

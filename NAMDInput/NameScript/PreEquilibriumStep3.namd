@@ -1,0 +1,106 @@
+#############################################################
+## JOB DESCRIPTION                                         ##
+#############################################################
+
+#
+#
+#
+#5ns at 310K run for input with protein constrained gradually removed
+#
+#
+#
+
+#############################################################
+## ADJUSTABLE PARAMETERS                                   ##
+#############################################################
+
+coordinates                          input.pdb
+structure                            input.psf
+bincoordinates                       input_eq3B.coor
+
+set outputname                       input_eq4B
+set restartname                      input_eq4B
+set temperature                      310
+
+firsttimestep                        0      ;# starting at 0 steps
+outputTiming                         25000  ;# Update every 50 ps
+
+#############################################################
+## SIMULATION PARAMETERS                                   ##
+#############################################################
+
+# Input
+paraTypeCharmm                       on
+parameters                           par_all_prot22_lipid36.par
+temperature                          $temperature
+
+# Periodic Cell
+extendedSystem                       input_eq3B.xsc
+wrapWater                            on
+wrapAll                              on
+
+# Full Electrostatics
+PME                                  on
+PMEGridSpacing                       1.0
+
+# Force-Field Parameters
+exclude                              scaled1-4
+1-4scaling                           1.0
+cutoff                               12.
+switching                            on
+switchdist                           8.   ;# use switching function at 8 angstroms
+pairlistdist                         14
+margin                               2.5
+
+# Integrator Parameters
+timestep                             2.0  ;# 2fs/step
+rigidBonds                           all  ;# needed for 2fs steps
+nonbondedFreq                        1
+fullElectFrequency                   2
+stepspercycle                        10
+
+# Output
+outputName                           $outputname
+outputEnergies                       500
+outputPressure                       500
+
+# Restart
+restartsave                          on
+restartname                          $restartname
+restartfreq                          50000 ;# create restart every 100 ps
+dcdfreq                              5000  ;# add to dcd every 10 ps
+veldcdfreq                           5000  ;# add to veldcd every 10 ps
+
+# Temperature Control
+langevin                             on
+langevinTemp                         $temperature
+langevinDamping                      1
+
+# Pressure Control
+useGroupPressure                     yes
+useFlexibleCell                      yes
+LangevinPiston                       on
+LangevinPistonTarget                 1.01325
+LangevinPistonPeriod                 200
+LangevinPistonDecay                  100
+LangevinPistonTemp                   310  
+
+#############################################################
+## EXTRA PARAMETERS                                        ##
+#############################################################
+constraints                          on 
+consref                              backboneS.pdb 
+conskfile                            backboneS.pdb
+conskcol                             B 
+#############################################################
+## EXECUTION SCRIPT                                        ##
+#############################################################
+
+# Equilibration
+reinitvels          $temperature;
+for {set i 0} {$i <= 9} {incr i 1} { 
+        set ck [expr {5 - $i*0.5}] 
+        constraintScaling $ck 
+reinitvels          $temperature;        
+run 250000 
+} 

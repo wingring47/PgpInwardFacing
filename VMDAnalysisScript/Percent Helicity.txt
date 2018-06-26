@@ -1,0 +1,27 @@
+proc ph {{infile} {lframe}} {
+set newfile [open $infile.txt w+]
+puts $newfile "H T C G I B E"
+set ac [atomselect top {name CA}]
+set allac [llength [lsort -unique[$ac get resid]]]
+for {set f 0} {$f <= $lframe} {incr f}  {
+  animate goto $f
+  display update ui  
+  set str [$ac get structure]
+  set ah [llength [lsearch -all $str H]]
+  set ht [llength [lsearch -all $str T]]
+  set cl [llength [lsearch -all $str C]]
+  set th [llength [lsearch -all $str G]]
+  set pi [llength [lsearch -all $str I]]
+  set bb [llength [lsearch -all $str B]]
+  set ec [llength [lsearch -all $str E]]
+  set pah [expr ($ah. / $allac. *100)]
+  set pht [expr ($ht. / $allac. *100)]
+  set pcl [expr ($cl. / $allac. *100)]
+  set pth [expr ($th. / $allac. *100)]
+  set ppi [expr ($pi. / $allac. *100)]
+  set pbb [expr ($bb. / $allac. *100)]
+  set pec [expr ($ec. / $allac. *100)]
+  puts $newfile "$pah $pht $pcl $pth $ppi $pbb $pec"
+ }
+close $newfile
+}

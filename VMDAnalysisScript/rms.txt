@@ -1,0 +1,56 @@
+ # Prints the RMSD of the protein atoms between each timestep
+        # and the first timestep for the given molecule id (default: top)
+        proc rmsd_time {molid selection output} {
+
+                # use frame 0 for the reference
+                set reference [atomselect $molid $selection frame 0]
+                # the frame being compared
+                set compare [atomselect $molid $selection]
+
+                set num_steps [molinfo $molid get numframes]
+                for {set frame 0} {$frame < $num_steps} {incr frame} {
+                        # get the correct frame
+                        $compare frame $frame
+
+                        # compute the transformation
+                        set trans_mat [measure fit $compare $reference]
+                        # do the alignment
+                        $compare move $trans_mat
+                        # compute the RMSD
+                        set rmsd [measure rmsd $compare $reference]
+                        # print the RMSD
+                        set chan [open $output.txt a]
+                        puts $chan $rmsd
+                        close $chan
+                }
+               unset reference
+               unset compare
+               unset num_steps
+               unset trans_mat
+               unset rmsd
+               unset chan
+        }
+
+ # Prints the RMSF of the protein atoms between each timestep
+                proc rmsf_time  {molid selection output} {
+                     set compare [atomselect $molid $selection]
+                     # compute the RMSF
+                     # specify the first and last frames, otherwise all
+                     set rmsf [measure rmsf $compare]
+                     # print the RMSF
+                     set length [llength $rmsf]
+                     for {set x 0} {$x <$length} {incr x} {
+                        set y [lindex $rmsf $x]
+                        set chan [open $output.txt a]
+                        puts $chan $y
+                        close $chan
+                     }
+                     unset compare
+                     unset rmsf
+                     unset length
+                     unset x
+                     unset y
+                     unset chan
+                }
+              
+  
